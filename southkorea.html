@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS 661 Glover Course Project</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet' />
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: rgb(169, 177, 185);
+}
+
+/* Style the header */
+header {
+  background-image: url(southkoreaflag.png);
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+  color: rgb(226, 9, 9);
+  -webkit-text-stroke: 1px black;
+}
+</style>
+</head>
+<body>
+    <header>
+    <h1>South Korea</h1>
+    </header>
+    <p>short description of South Korea  
+    </p>
+<br>
+<br>
+<br>
+<br>
+    <h2>South Korean Thrash Metal: Method</h2>
+<style>
+  .container {
+    display: flex;
+    width: 100%;
+    height: 500px; /* Set desired map height */
+  }
+  .left-image {
+    width: 50%;
+    object-fit: cover;
+  }
+  #map {
+    width: 50%;
+  }
+</style>
+
+<div class="container">
+    <img src="Methodband.jpg" class="left-image" alt="Method">
+    <div id="map"></div>
+</div>
+
+<script>
+  // Replace with your actual access token
+  mapboxgl.accessToken = 'pk.eyJ1IjoiZ2xvdmVyZ2lzIiwiYSI6ImNtbGxqMjl5bDA5MnMza3B1dG8xZm1ucWYifQ.RlEi6bHpGJyjO78Nkw9KVw'; 
+  const map = new mapboxgl.Map({
+      container: 'map', // matches the ID of your div
+      style: 'mapbox://styles/glovergis/cmnrybhs1003701su4ax1gf7h', // map style URL
+      center: [127.897, 35.950], // starting position [lng, lat] for South Korea
+      zoom: 5.65 // starting zoom
+  });
+</script>
+    <p> Method band info blah</p>
+    <a href="https://www.youtube.com/watch?v=KEtPT3rWLKg&list=RDKEtPT3rWLKg&start_radio=1" target="_blank">
+  <button>Watch Method "Circle of Violence" (South Korea) Video</button>
+</a>
+
+<br>
+<br>
+    <nav>
+        <a href="index.html">Return Home</a>
+        <a href="china.html">China</a>
+        <a href="japan.html">Japan</a>
+        <a href="Taiwan.html">Taiwan</a>
+    </nav>
+</body>
+</html>

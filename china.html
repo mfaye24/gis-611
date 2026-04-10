@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS 661 Glover Course Project</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet' />
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: rgb(169, 177, 185);
+}
+
+/* Style the header */
+header {
+  background-image: url(chinaflag.png);
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+  color: rgb(240, 224, 11);
+  -webkit-text-stroke: 1px black;
+}
+</style>
+</head>
+<body>
+    <header>
+    <h1>China</h1>
+    </header>
+    <p>short description of China    
+    </p>
+<br>
+<br>
+<br>
+<br>
+    <h2>Example of Distinctive Chinese Metal: Tang Dynasty</h2>
+<style>
+  .container {
+    display: flex;
+    width: 100%;
+    height: 500px; /* Set desired map height */
+  }
+  .left-image {
+    width: 50%;
+    object-fit: cover;
+  }
+  #map {
+    width: 50%;
+  }
+</style>
+
+<div class="container">
+    <img src="Tang_Dynasty_playing_in_Xian.JPG" class="left-image" alt="Tang Dynasty Performance in Xi'an">
+    <div id="map"></div>
+</div>
+
+<script>
+  // Replace with your actual access token
+  mapboxgl.accessToken = 'pk.eyJ1IjoiZ2xvdmVyZ2lzIiwiYSI6ImNtbGxqMjl5bDA5MnMza3B1dG8xZm1ucWYifQ.RlEi6bHpGJyjO78Nkw9KVw'; 
+  const map = new mapboxgl.Map({
+      container: 'map', // matches the ID of your div
+      style: 'mapbox://styles/glovergis/cmns046l2000p01svhpsa3suq', // map style URL
+      center: [104.1954, 35.8617], // starting position [lng, lat] for China
+      zoom: 3 // starting zoom
+  });
+</script>
+    <p>Established in 1988, Tang Dynasty is widely accepted to be China's first metal band.  
+        The band takes its name from the historical Tang Dynasty, 618-907 CE, an expansive empire whose borders extended along the Silk Roads into Central Asia.
+        They are a prime example of how a global music genre can be assimilated into local culture and history.
+        Their lyrical themes center around the historic Chinese conception of the "ideal man" who exhibits both cultural refinement, or "wen" and martial ability, or "wu."
+        The band's lyrical content is largely based on poetry from the Tang period, reflecting "wen" while their sound and stage performance is largely classic heavy metal occasionally mixed with acoustic zithers for a class tea house aura.
+         </p>
+    <a href="https://www.youtube.com/watch?v=Ba4jXBnkLvo&list=RDBa4jXBnkLvo&start_radio=1" target="_blank">
+  <button>Watch Tang Dynasty "Return to Tang Dynasty" (China) Video</button>
+</a>
+
+<br>
+<br>
+    <nav>
+        <a href="index.html">Return Home</a>
+        <a href="japan.html">Japan</a>
+        <a href="southkorea.html">South Korea</a>
+        <a href="Taiwan.html">Taiwan</a>
+    </nav>
+</body>
+</html>

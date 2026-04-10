@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS 661 Glover Course Project</title>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: rgb(169, 177, 185);
+  width: 97%;
+  margin: 0 auto;
+}
+
+/* Style the header */
+header {
+  background-image: url(metal_background.jpg);
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+  color: rgb(226, 9, 9);
+  -webkit-text-stroke: 1px black;
+}
+
+/* Style the paragraphs */
+P {
+  text-align: center;
+  font-size: 25px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  margin-right: 100px;
+  margin-left: 100px;
+}
+
+/* Style the h2 heading */
+h2 {
+  text-align: center;
+}
+</style>
+
+</head>
+
+<body>
+    <header>
+    <h1>Exploring the Metal Scenes in Four East Asian Countries: China, Japan, South Korea, and Taiwan</h1>
+    </header>
+    <p>While metal music is most often associated with Western cultures, it has also developed a significant presence in East Asia, particularly in China, Japan, South Korea, and Taiwan. All four countries in the study are economic powerhouses and they share different historical links to each other.  Three of the countries are free-market democracies while one is a one-party communist government.  How have their locations, histories, commonalities, and differences impacted their metal scenes? This web mapping project seeks to provide the resources to answer some of those questions.    
+    </p>
+<br>
+<br>
+  <h2>Interactive 3D Map of Number of Bands by Location</h2>
+  <p>The 3D map below symbolizes the number of metal bands by location in the four countries of this study.  The taller the silo, the higher number of bands that call that location home.  Feel free to zoom in and out and hover your cursor over the silos for the specific number of bands at that site.</p>
+   <iframe src="kepler.gl.html"
+    height="800" 
+    width="100%" 
+    title="Kepler.gl Map"
+    style="border:none;">
+</iframe>
+<br>
+<br>
+<br>
+<br>
+<div>
+  <h2>Interactive ArcGIS Dashboard</h2>
+  <p>This dashboard displays locations and information on metal bands founded in China, Japan, South Korea, and Taiwan from Japan's Flower Travellin' Band, founded in 1969, to 2022. An interactive map is tied to selectors for country and decade which also interact with a pie chart showing percentages of bands that play a specific metal sub-genre, two serial charts for bands that play a hybrid of up to 3 metal sub-genres and and non-metal genres, and a third chart for top 10 record labels. Both selectors also interact with the stacked indicators that display number of bands, number of female musicians, and total number of musicians. The line chart for number of bands formed by year is interactive with the Country selector. Finally, an interactive table of lyrical themes addressed by the bands is also tied to the country and decade selectors and the interactive map.</p>
+    <iframe 
+    src="https://www.arcgis.com/apps/dashboards/7769deb64ba548cdabe1d62d399ebd31" 
+    height="800" 
+    width="100%" 
+    title="ArcGIS Dashboard"
+    style="border:none;">
+    </iframe>
+</div>
+<br>
+<br>
+<br>
+<div>
+    <h2> Explore each country and check out a representative band</h2>
+    <p>Click on the country links to the lower left to choose a country.</p>
+    <nav>
+      <a href="china.html">China</a>
+      <a href="japan.html">Japan</a>
+      <a href="southkorea.html">South Korea</a>
+      <a href="Taiwan.html">Taiwan</a>
+    </nav>
+<br>
+<nav>
+  <a href="about.html">About</a>
+</nav>
+</div>
+</body>
+</html>
