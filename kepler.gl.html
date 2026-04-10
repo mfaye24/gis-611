@@ -1,0 +1,246 @@
+
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8"/>
+        <title>Kepler.gl embedded map</title>
+
+        <!--Uber Font-->
+        <link rel="stylesheet" href="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/uber-fonts/4.0.0/superfine.css">
+
+        <!--Kepler css-->
+        <link href="https://unpkg.com/kepler.gl@3.3.0-alpha.0/umd/keplergl.min.css" rel="stylesheet">
+
+        <!--MapBox css-->
+        <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.1/mapbox-gl.css" rel="stylesheet">
+        <link href="https://unpkg.com/maplibre-gl@^3/dist/maplibre-gl.css" rel="stylesheet">
+
+        <!-— facebook open graph tags -->
+        <meta property="og:url" content="http://kepler.gl/" />
+        <meta property="og:title" content="Large-scale WebGL-powered Geospatial Data Visualization Tool" />
+        <meta property="og:description" content="Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets." />
+        <meta property="og:site_name" content="kepler.gl" />
+        <meta property="og:image" content="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/kepler.gl-meta-tag.png" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="800" />
+        <meta property="og:image:height" content="800" />
+
+        <!-— twitter card tags -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@openjsf">
+        <meta name="twitter:creator" content="@openjsf">
+        <meta name="twitter:title" content="Large-scale WebGL-powered Geospatial Data Visualization Tool">
+        <meta name="twitter:description" content="Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets.">
+        <meta name="twitter:image" content="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/kepler.gl-meta-tag.png" />
+
+        <!-- Load React/Redux -->
+        <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/redux@4.2.1/dist/redux.js" crossorigin></script>
+        <script src="https://unpkg.com/react-redux@8.1.2/dist/react-redux.min.js" crossorigin></script>
+        <script src="https://unpkg.com/styled-components@6.1.8/dist/styled-components.min.js" crossorigin></script>
+
+        <!-- Load Kepler.gl -->
+        <script src="https://unpkg.com/kepler.gl@3.3.0-alpha.0/umd/keplergl.min.js" crossorigin></script>
+
+        <style type="text/css">
+          body {margin: 0; padding: 0; overflow: hidden;}
+        </style>
+
+        <!--MapBox token-->
+        <!--
+          SECURITY NOTE: Your Mapbox access token is embedded below in plain text.
+          Anyone with access to this HTML file can see and use this token.
+          Consider using a scoped token with URL restrictions to limit misuse.
+          See: https://docs.mapbox.com/accounts/guides/tokens/#url-restrictions
+        -->
+        <script>
+          /**
+           * Provide your MapBox Token
+           **/
+          const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ2xvdmVyZ2lzIiwiYSI6ImNtbGxqMjl5bDA5MnMza3B1dG8xZm1ucWYifQ.RlEi6bHpGJyjO78Nkw9KVw';
+          const WARNING_MESSAGE = 'Please Provide a Mapbox Token in order to use Kepler.gl. Edit this file and fill out MAPBOX_TOKEN with your access key';
+        </script>
+
+        <!-- GA: Delete this as you wish, However to pat ourselves on the back, we only track anonymous pageview to understand how many people are using kepler.gl. -->
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+          ga('create', 'UA-64694404-19', {
+            'storage': 'none',
+            'clientId': localStorage.getItem('ga:clientId')
+          });
+          ga(function(tracker) {
+              localStorage.setItem('ga:clientId', tracker.get('clientId'));
+          });
+          ga('set', 'checkProtocolTask', null); // Disable file protocol checking.
+          ga('set', 'checkStorageTask', null); // Disable cookie storage checking.
+          ga('set', 'historyImportTask', null); // Disable history checking (requires reading from cookies).
+          ga('set', 'page', 'keplergl-html');
+          ga('send', 'pageview');
+        </script>
+      </head>
+      <body>
+        <!-- We will put our React component inside this div. -->
+        <div id="app">
+          <!-- Kepler.gl map will be placed here-->
+        </div>
+
+        <!-- Load our React component. -->
+        <script>
+          /* Validate Mapbox Token */
+          if ((MAPBOX_TOKEN || '') === '' || MAPBOX_TOKEN === 'PROVIDE_MAPBOX_TOKEN') {
+            alert(WARNING_MESSAGE);
+          }
+
+          /** STORE **/
+          const reducers = (function createReducers(redux, keplerGl) {
+            return redux.combineReducers({
+              // mount keplerGl reducer
+              keplerGl: keplerGl.keplerGlReducer.initialState({
+                uiState: {
+                  readOnly: true,
+                  currentModal: null
+                }
+              })
+            });
+          }(Redux, KeplerGl));
+
+          const middleWares = (function createMiddlewares(keplerGl) {
+            return keplerGl.enhanceReduxMiddleware([
+              // Add other middlewares here
+            ]);
+          }(KeplerGl));
+
+          const enhancers = (function craeteEnhancers(redux, middles) {
+            return redux.applyMiddleware(...middles);
+          }(Redux, middleWares));
+
+          const store = (function createStore(redux, enhancers) {
+            const initialState = {};
+
+            return redux.createStore(
+              reducers,
+              initialState,
+              redux.compose(enhancers)
+            );
+          }(Redux, enhancers));
+          /** END STORE **/
+
+          /** COMPONENTS **/
+          var KeplerElement = (function makeKeplerElement(react, keplerGl, mapboxToken) {
+            var LogoSvg = function LogoSvg() {
+              return react.createElement(
+                "div",
+                { className: "logo-container", style: {position: 'fixed', zIndex: 10000, padding: '4px'} },
+                  react.createElement(
+                    "svg",
+                    {
+                      className: "kepler_gl__logo",
+                      width: "107px",
+                      height: "21px",
+                      viewBox: "0 0 124 24"
+                    },
+                    react.createElement(
+                      "g",
+                      { transform: "translate(13.500000, 13.500000) rotate(45.000000) translate(-13.500000, -13.500000) translate(4.000000, 4.000000)" },
+                      react.createElement("rect", { x: "0", y: "6", transform: "matrix(2.535181e-06 1 -1 2.535181e-06 18.1107 6.0369)", fill: "#535C6C", width: "12.1", height: "12.1" }),
+                      react.createElement("rect", { x: "6", y: "0", transform: "matrix(2.535182e-06 1 -1 2.535182e-06 18.1107 -6.0369)", fill:"#1FBAD6", width: "12.1", height: "12.1" })
+                    ),
+                    react.createElement(
+                      "g",
+                      {},
+                      react.createElement("path", { fill:"#1FBAD6", d: "M39,8.7h2.2l-2.8,4.2l2.9,5.1H39l-2.4-4.2h-1.3V18h-2V5l2-0.1v7.3h1.3L39,8.7z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M42.4,13.3c0-1.5,0.4-2.7,1.1-3.5s1.8-1.2,3.1-1.2c1.3,0,2.2,0.4,2.8,1.1c0.6,0.7,0.9,1.8,0.9,3.3 c0,0.4,0,0.8,0,1.1h-5.8c0,1.6,0.8,2.4,2.4,2.4c1,0,2-0.2,2.9-0.6l0.2,1.7c-0.4,0.2-0.9,0.4-1.4,0.5s-1.1,0.2-1.7,0.2 c-1.5,0-2.6-0.4-3.3-1.2C42.8,16.1,42.4,14.9,42.4,13.3z M46.6,10.1c-0.7,0-1.2,0.2-1.5,0.5c-0.4,0.4-0.6,0.9-0.6,1.7h4 c0-0.8-0.2-1.4-0.5-1.7S47.2,10.1,46.6,10.1z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M57.1,18.2c-1,0-1.8-0.3-2.3-0.9l0,0l0,1.3v2.5h-2V8.7h1.5l0.3,0.9h0c0.3-0.3,0.7-0.6,1.2-0.7 c0.4-0.2,0.9-0.3,1.4-0.3c1.2,0,2.1,0.4,2.7,1.1c0.6,0.7,0.9,2,0.9,3.7c0,1.6-0.3,2.8-1,3.7C59.2,17.8,58.3,18.2,57.1,18.2z M56.7,10.3c-0.4,0-0.8,0.1-1.1,0.2c-0.3,0.2-0.6,0.4-0.8,0.7v4.3c0.2,0.3,0.4,0.5,0.7,0.7c0.3,0.2,0.7,0.3,1.1,0.3 c0.7,0,1.2-0.2,1.6-0.7c0.4-0.5,0.5-1.3,0.5-2.5c0-0.8-0.1-1.4-0.2-1.8s-0.4-0.7-0.7-0.9C57.6,10.4,57.2,10.3,56.7,10.3z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M63.2,16V5l2-0.1v10.8c0,0.3,0.1,0.5,0.2,0.6c0.1,0.1,0.3,0.2,0.6,0.2c0.3,0,0.6,0,0.9-0.1V18 c-0.4,0.1-1,0.2-1.6,0.2c-0.8,0-1.3-0.2-1.7-0.5S63.2,16.8,63.2,16z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M68.2,13.3c0-1.5,0.4-2.7,1.1-3.5c0.7-0.8,1.8-1.2,3.1-1.2c1.3,0,2.2,0.4,2.8,1.1c0.6,0.7,0.9,1.8,0.9,3.3 c0,0.4,0,0.8,0,1.1h-5.8c0,1.6,0.8,2.4,2.4,2.4c1,0,2-0.2,2.9-0.6l0.2,1.7c-0.4,0.2-0.9,0.4-1.4,0.5s-1.1,0.2-1.7,0.2 c-1.5,0-2.6-0.4-3.3-1.2C68.6,16.1,68.2,14.9,68.2,13.3z M72.4,10.1c-0.7,0-1.2,0.2-1.5,0.5c-0.4,0.4-0.6,0.9-0.6,1.7h4 c0-0.8-0.2-1.4-0.5-1.7S73,10.1,72.4,10.1z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M80.2,8.7l0.1,1.7h0c0.3-0.6,0.7-1.1,1.1-1.4c0.4-0.3,1-0.5,1.6-0.5c0.4,0,0.7,0,1,0.1l-0.1,2 c-0.3-0.1-0.7-0.2-1-0.2c-0.7,0-1.3,0.3-1.7,0.8c-0.4,0.5-0.7,1.2-0.7,2.1V18h-2V8.7H80.2z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M83.8,17c0-0.8,0.4-1.2,1.2-1.2c0.8,0,1.2,0.4,1.2,1.2c0,0.8-0.4,1.1-1.2,1.1C84.2,18.2,83.8,17.8,83.8,17z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M88.5,18.7c0-0.8,0.4-1.4,1.2-1.8c-0.6-0.3-0.9-0.8-0.9-1.5c0-0.7,0.4-1.2,1.1-1.6c-0.3-0.3-0.6-0.6-0.7-0.9 c-0.2-0.4-0.2-0.8-0.2-1.3c0-1,0.3-1.8,0.9-2.3c0.6-0.5,1.6-0.8,2.8-0.8c0.5,0,1,0,1.4,0.1c0.4,0.1,0.8,0.2,1.1,0.4l2.4-0.2v1.5 h-1.5c0.2,0.4,0.2,0.8,0.2,1.3c0,1-0.3,1.7-0.9,2.2s-1.5,0.8-2.7,0.8c-0.7,0-1.2-0.1-1.6-0.2c-0.1,0.1-0.2,0.2-0.3,0.3 c-0.1,0.1-0.1,0.2-0.1,0.4c0,0.2,0.1,0.3,0.2,0.4c0.1,0.1,0.3,0.2,0.6,0.2l2.7,0.2c1,0.1,1.7,0.3,2.2,0.6c0.5,0.3,0.8,0.9,0.8,1.7 c0,0.6-0.2,1.1-0.5,1.5c-0.4,0.4-0.9,0.8-1.5,1c-0.7,0.2-1.5,0.4-2.4,0.4c-1.3,0-2.3-0.2-3-0.6C88.8,20.1,88.5,19.5,88.5,18.7z M95.1,18.4c0-0.3-0.1-0.5-0.3-0.7s-0.6-0.2-1.1-0.3l-2.7-0.3c-0.2,0.1-0.4,0.3-0.5,0.5c-0.1,0.2-0.2,0.4-0.2,0.6 c0,0.4,0.2,0.8,0.5,1c0.4,0.2,1,0.3,1.8,0.3C94.2,19.5,95.1,19.2,95.1,18.4z M94.3,11.5c0-0.6-0.1-1-0.4-1.2 c-0.3-0.2-0.7-0.3-1.3-0.3c-0.7,0-1.1,0.1-1.4,0.3c-0.3,0.2-0.4,0.6-0.4,1.2s0.1,1,0.4,1.2c0.3,0.2,0.7,0.3,1.4,0.3 c0.6,0,1.1-0.1,1.3-0.4S94.3,12,94.3,11.5z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M99.4,16V5l2-0.1v10.8c0,0.3,0.1,0.5,0.2,0.6c0.1,0.1,0.3,0.2,0.6,0.2c0.3,0,0.6,0,0.9-0.1V18 c-0.4,0.1-1,0.2-1.6,0.2c-0.8,0-1.3-0.2-1.7-0.5S99.4,16.8,99.4,16z" })
+                    )
+                  )
+                );
+              };
+
+            return function App() {
+              var rootElm = react.useRef(null);
+              var _useState = react.useState({
+                width: window.innerWidth,
+                height: window.innerHeight
+              });
+              var windowDimension = _useState[0];
+              var setDimension = _useState[1];
+              react.useEffect(function sideEffect(){
+                function handleResize() {
+                  setDimension({width: window.innerWidth, height: window.innerHeight});
+                };
+                window.addEventListener('resize', handleResize);
+                return function() {window.removeEventListener('resize', handleResize);};
+              }, []);
+              return react.createElement(
+                'div',
+                {style: {position: 'absolute', left: 0, width: '100vw', height: '100vh'}},
+                LogoSvg(),
+                react.createElement(keplerGl.KeplerGl, {
+                  mapboxApiAccessToken: mapboxToken,
+                  id: "map",
+                  width: windowDimension.width,
+                  height: windowDimension.height
+                })
+              )
+            }
+          }(React, KeplerGl, MAPBOX_TOKEN));
+
+          const app = (function createReactReduxProvider(react, reactRedux, KeplerElement) {
+            return react.createElement(
+              reactRedux.Provider,
+              {store},
+              react.createElement(KeplerElement, null)
+            )
+          }(React, ReactRedux, KeplerElement));
+          /** END COMPONENTS **/
+
+          /** Render **/
+          (function render(react, reactDOM, app) {
+            const container = document.getElementById('app');
+            const root = reactDOM.createRoot(container);
+            root.render(app);
+          }(React, ReactDOM, app));
+        </script>
+        <!-- The next script will show how to interact directly with Kepler map store -->
+        <script>
+          /**
+           * Customize map.
+           * In the following section you can use the store object to dispatch Kepler.gl actions
+           * to add new data and customize behavior
+           */
+          (function customize(keplerGl, store) {
+            const datasets = [{"version":"v1","data":{"id":"-t3d898","label":"GIS 661 Course Project sheet 3D v2.csv","color":[143,47,191],"allData":[[39.9042,116.4074,"Beijing","China",120],[31.2304,121.4737,"Shanghai","China",25],[30.658611,104.064722,"Chengdu, Sichuan Province","China",14],[23.1290798,113.2643585,"Guangzhou, Guangdong Province","China",14],[36.066667,120.383333,"Qingdao, Shandong Province","China",13],[39.0851,117.1994,"Tianjin","China",12],[34.266667,108.9,"Xi'an, Shaanxi Province","China",12],[43.9,125.2,"Changchun, Jilin Province","China",7],[30.583333,114.283333,"Wuhan, Hubei Province","China",7],[25.066667,102.683333,"Kunming, Yunnan Province","China",6],[36.033333,103.8,"Lanzhou, Gansu Province","China",6],[28.683333,115.883333,"Nanchang, Jiangxi Province","China",6],[41.805865,123.432253,"Shenyang, Liaoning Province","China",6],[29.5657,106.5512,"Chongqing","China",5],[32.05,118.766667,"Nanjing, Jiangsu Province","China",5],[34.766667,113.65,"Zhengzhou, Henan Province","China",5],[31.866667,117.283333,"Hefei, Anhui Province","China",4],[41.116667,121.133333,"Jinzhou, Liaoning Province","China",4],[31.2304,121.4737,"Shandong Province","China",4],[36.2,117.083333,"Tai'an, Shandong Province","China",4],[28.196111,112.972222,"Changsha, Hunan Province","China",3],[49.2,119.7,"Hailar, Hulun Buir, Inner Mongolia Autonomous Region","China",3],[30.25,120.166667,"Hangzhou, Zhejiang Province","China",3],[49.2,119.7,"Hulun Buir, Inner Mongolia Autonomous Region","China",3],[22.816667,108.316667,"Nanning, Guangxi Zhuang Autonomous Region","China",3],[34.26,117.21,"Suzhou, Jiangsu Province","China",3],[37.869444,112.560278,"Taiyuan, Shanxi Province","China",3],[38.920833,121.639167,"Dalian, Liaoning Province","China",2],[26.076111,119.306389,"Fuzhou, Fujian Province","China",2],[36.6,114.483333,"Handan, Hebei Province","China",2],[45.75,126.633333,"Harbin, Heilongjiang Province","China",2],[23.75,114.7,"Heyuan City, Guangdong Province","China",2],[36.666667,116.983333,"Ji'nan, Shandong Province","China",2],[34.669722,112.442222,"Luoyang, Henan Province","China",2],[22.55,114.1,"Shenzhen, Guangdong Province","China",2],[43.825,87.6,"Urumqi, Xinjiang Uyghur Autonomous Region","China",2],[24.4795093,118.0894775,"Xiamen, Fujian Province","China",2],[38.466667,106.266667,"Yinchuan, Ningxia Hui Autonomous Region","China",2],[36.783333,118.05,"Zibo, Shandong Province","China",2],[39.9042,116.4074,"Beijing (early);  Langfang, Hebei Province (later)","China",1],[39.9042,116.4074,"Beijing (early); Los Angeles, United States (later)","China",1],[39.9042,116.4074,"Beijing (early); New York, New York, United States (later)","China",1],[39.9042,116.4074,"Beijing / Jinzhou/Wuhan, Hubei Province","China",1],[39.9042,116.4074,"Beijing / Wuhan, Hubei Province","China",1],[25.0364,101.5456,"Chuxiong, Yunnan Province","China",1],[27.983333,116.35,"Fuzhou, Jiangxi Province","China",1],[23.1290798,113.2643585,"Guangzhou, Guangdong","China",1],[30.25,120.166667,"Hangzhou City, Zhejiang Province","China",1],[30.25,120.166667,"Hangzhou, Zhejiang","China",1],[39.129722,117.251111,"Hedong District, Tianjin","China",1],[40.816667,111.65,"Hohhot, Inner Mongolia Autonomous Region","China",1],[49.2,119.7,"Hulun Buir, Inner Mongolia Autonomous Region / Guangzhou, Guangdong Province","China",1],[45.3,130.966667,"Jixi, Heilongjiang Province","China",1],[41.65,86.133333,"Korla, Xinjiang Uyghur Autonomous Region","China",1],[26.883333,100.233333,"Lijiang, Yunnan Province","China",1],[31.466667,104.683333,"Mianyang, Sichuan Province","China",1],[28.683333,115.883333,"Nanchang, Jiangxi Province/Yulin, Guangxi Province/Liaocheng, Shandong Province","China",1],[22.816667,108.316667,"Nanning, Guangxi","China",1],[29.866667,121.55,"Ningbo, Sichuan Province","China",1],[47.35,123.916667,"Qiqihar, Heilongjiang Province","China",1],[45.766667,131,"Qitaihe, Heilongjiang Province","China",1],[25.483333,103.8,"Qujing, Yunnan Province","China",1],[31.2304,121.4737,"Shandong","China",1],[31.2304,121.4737,"Shandong Province (early); Xi'an, Shaanxi Province (later)","China",1],[22.55,114.1,"Shenzhen/Zhuhai, Guangdong Province","China",1],[38.043611,114.498333,"Shijiazhuang, Hebei Province","China",1],[36.2,117.083333,"Taian, Shandong Province (early); Beijing (later)","China",1],[39.6,118.176111,"Tangshan, Hebei Province (early); Beijing (later)","China",1],[34.583333,105.733333,"Tianshui, Gansu Province","China",1],[43.825,87.6,"Urumuqi, Xinjiang Uyghur Autonomous Region","China",1],[28,120.7,"Wenzhou, Zhejiang Province","China",1],[30.583333,114.283333,"Wuchang, Hubei Province","China",1],[35.3,113.866667,"Xinxiang, Henan Province","China",1],[34.26,117.21,"Xuzhou, Jiangsu Province","China",1],[37.85,113.566667,"Yangquan, Shanxi Province","China",1],[24.35,102.533333,"Yuxi, Yunnan Province","China",1],[32.2,119.416667,"Zhenjiang, Jiangsu Province","China",1],[22.3193,114.1694,"Hong Kong","China",43],[22.407,114.122,"New Territories","China",1],[35.6762,139.6503,"Tokyo","Japan",976],[34.693889,135.502222,"Osaka, Osaka Prefecture","Japan",333],[35.181456,136.906386,"Nagoya, Aichi Prefecture","Japan",130],[43.0343477,141.3587952,"Sapporo, Hokkaido","Japan",64],[35.106317,135.727375,"Kyoto, Kyoto Prefecture","Japan",60],[33.5969611,130.4080679,"Fukuoka, Fukuoka Prefecture","Japan",48],[35.3200263,139.5800484,"Yokohama, Kanagawa Prefecture","Japan",36],[34.6799878,135.1699816,"Kobe, Hyogo Prefecture","Japan",33],[38.266667,140.866667,"Sendai, Miyagi Prefecture","Japan",28],[37.916111,139.036389,"Niigata, Niigata Prefecture","Japan",26],[35.866667,139.65,"Saitama, Saitama Prefecture","Japan",25],[35.6,140.1,"Chiba, Chiba Prefecture","Japan",24],[34.385278,132.455278,"Hiroshima, Hiroshima Prefecture","Japan",20],[35.7,139.983333,"Funabashi, Chiba Prefecture","Japan",13],[34.6720296,133.9170865,"Okayama, Okayama Prefecture","Japan",13],[36.745573,138.266316,"Nagano, Nagano Prefecture","Japan",12],[26.334167,127.805556,"Okinawa, Okinawa Prefecture","Japan",12],[34.9858348,138.3853926,"Shizuoka, Shizuoka Prefecture","Japan",12],[34.7180733,137.7327193,"Hamamatsu, Shizuoka Prefecture","Japan",10],[35.416667,136.766667,"Gifu, Gifu Prefecture","Japan",9],[35.4914,139.2841,"Kanagawa Prefecture","Japan",9],[35.4914,139.2841,"Kanagawa, Kanagawa Prefecture","Japan",9],[35.526329,139.699707,"Kawasaki, Kanagawa Prefecture","Japan",8],[35.25,139.666667,"Yokosuka, Kanagawa Prefecture","Japan",8],[35.0183,137.2924,"Aichi Prefecture","Japan",7],[43.2203,142.8635,"Hokkaido","Japan",7],[35.5,140.116667,"Ichikawa, Chiba Prefecture","Japan",7],[34.9290476,136.6229095,"Yokkaichi, Mie Prefecture","Japan",7],[35.861354,139.980065,"Kashiwa, Chiba Prefecture","Japan",6],[35.19,135.92,"Shiga, Shiga Prefecture","Japan",6],[36.034901,140.08015,"Tsukuba, Ibaraki Prefecture","Japan",6],[35.4408394,139.3662643,"Atsugi, Kanagawa Prefecture","Japan",5],[36.2194,140.1833,"Ibaraki Prefecture","Japan",5],[36.5600023,136.6400211,"Kanazawa, Ishikawa Prefecture","Japan",5],[33.873577,130.872772,"Kitakyushu, Fukuoka Prefecture","Japan",5],[32.783333,129.866667,"Nagasaki, Nagasaki Prefecture","Japan",5],[34.183333,131.466667,"Yamaguchi, Yamaguchi Prefecture","Japan",5],[33.6025,132.7858,"Ehime Prefecture","Japan",4],[33.591389,130.414722,"Hakata, Fukuoka Prefecture","Japan",4],[34.858,134.5454,"Hyogo Prefecture","Japan",4],[31.6,130.55,"Kagoshima, Kagoshima Prefecture","Japan",4],[35.066667,136.683333,"Kuwana, Mie Prefecture","Japan",4],[31.916667,131.416667,"Miyazaki, Miyazaki Prefecture","Japan",4],[39.683333,141.15,"Morioka, Iwate Prefecture","Japan",4],[34.9351055,137.1699448,"Okazaki, Aichi Prefecture","Japan",4],[36.55,139.883333,"Utsunomiya, Tochigi Prefecture","Japan",4],[35.6,140.1,"Chiba City, Chiba Prefecture","Japan",3],[35.170487,138.6810303,"Fuji, Shizuoka Prefecture","Japan",3],[37.786486,140.388435,"Fukushima, Fukushima Prefecture","Japan",3],[35.25,136.783333,"Inazawa, Aichi Prefecture","Japan",3],[37.033254,140.905004,"Iwaki, Fukushima Prefecture","Japan",3],[34.222563,134.035731,"Kagawa, Kagawa Prefecture","Japan",3],[35.4914,139.2841,"Kanagawa, Kanagawa Prefecture / Tokyo","Japan",3],[33.833333,132.766667,"Matsuyama, Ehime Prefecture","Japan",3],[34.683333,135.8,"Nara, Nara Prefecture","Japan",3],[34.7342,135.343846,"Nishinomiya, Hyogo Prefecture","Japan",3],[34.693889,135.502222,"Osaka, Osaka Prefecture (early); Tokyo (later)","Japan",3],[33.266667,130.3,"Saga, Saga Prefecture","Japan",3],[36.3845764,139.7350845,"Tochigi, Tochigi Prefecture","Japan",3],[34.066667,134.55,"Tokushima, Tokushima Prefecture","Japan",3],[35.873746,140.035224,"Abiko, Chiba Prefecture","Japan",2],[34.733333,135.4,"Amagasaki, Hyogo Prefecture","Japan",2],[43.766667,142.366667,"Asahikawa, Hokkaido","Japan",2],[35.3354,140.1833,"Chiba Prefecture","Japan",2],[35.35,139.466667,"Fujisawa, Kanagawa Prefecture","Japan",2],[35.289719,135.128876,"Fukuchiyama, Kyoto Prefecture","Japan",2],[34.483333,133.366667,"Fukuyama, Hiroshima Prefecture","Japan",2],[26.278895,127.780377,"Ginowan, Okinawa Prefecture","Japan",2],[36.5605,138.88,"Gunma Prefecture","Japan",2],[34.8334413,134.6938858,"Himeji, Hyogo Prefecture","Japan",2],[34.812081,135.657435,"Hirakata, Osaka Prefecture","Japan",2],[40.6,140.466667,"Hirosaki, Aomori Prefecture","Japan",2],[34.15,132.183333,"Iwakuni, Yamaguchi Prefecture","Japan",2],[34.765755,134.839508,"Kakogawa, Hyogo Prefecture","Japan",2],[35,135,"Kansai Region","Japan",2],[35.91769,139.4910616,"Kawagoe, Saitama Prefecture","Japan",2],[35.8,139.716667,"Kawaguchi, Saitama Prefecture","Japan",2],[36.4,139.333333,"Kiryu, Gunma Prefecture","Japan",2],[39.283333,141.116667,"Kitakami, Iwate Prefecture","Japan",2],[33.566667,133.533333,"Kochi, Kochi Prefecture","Japan",2],[37.4,140.383333,"Koriyama, Fukushima Prefecture","Japan",2],[36.1454222,139.3855896,"Kumagaya, Saitama Prefecture","Japan",2],[44.351406,143.358154,"Monbetsu, Hokkaido","Japan",2],[26.212222,127.679167,"Naha, Okinawa Prefecture","Japan",2],[34.755662,135.52024,"Suita, Osaka Prefecture","Japan",2],[35.6762,139.6503,"Tokyo / Osaka, Osaka Prefecture","Japan",2],[35.500377,134.2332946,"Tottori, Tottori Prefecture","Japan",2],[36.6999937,137.2300109,"Toyama, Toyama Prefecture","Japan",2],[34.884444,135.799722,"Uji, Kyoto Prefecture","Japan",2],[35.296716,139.581547,"Zushi, Kanagawa Prefecture","Japan",2],[35.970678,139.605073,"Ageo, Saitama Prefecture","Japan",1],[34.650532,134.984146,"Akashi, Hyogo Prefecture","Japan",1],[40.816667,140.75,"Aomori, Aomori Prefecture","Japan",1],[35.793877,139.5961,"Asaka, Saitama Prefecture","Japan",1],[35.433333,139.433333,"Ayase, Kanagawa Prefecture","Japan",1],[35.6,140.1,"Chiba, Chiba Prefecture / Tokyo","Japan",1],[35.9927996,139.082634,"Chichibu, Saitama Prefecture","Japan",1],[35.333333,139.4,"Chigasaki/Fujisawa/Yokohama, Kanagawa / Sendai, Miyagi / Tokyo","Japan",1],[35.446389,139.390833,"Ebina, Kanagawa Prefecture","Japan",1],[36.066667,136.216667,"Fukui, Fukui Prefecture","Japan",1],[33.5969611,130.4080679,"Fukuoka, Fukuoka Prefecture (early); Tokyo (later)","Japan",1],[36.5605,138.88,"Gunma, Gunma Prefecture","Japan",1],[35.366667,139.216667,"Hadano, Kanagawa Prefecture","Japan",1],[41.766667,140.733333,"Hakodate, Hokkaido","Japan",1],[39.387283,141.120773,"Hanamaki, Iwate Prefecture","Japan",1],[35.986758,139.668222,"Hasuda, Saitama Prefecture","Japan",1],[34.416667,132.733333,"Higashihiroshima, Hiroshima Prefecture","Japan",1],[34.670971,135.617554,"Higashiosaka, Osaka Prefecture","Japan",1],[33.933333,132.066667,"Hirao, Yamaguchi Prefecture","Japan",1],[34.385278,132.455278,"Hiroshima, Hiroshima Prefecture / Kobe, Hyogo Prefecture","Japan",1],[36.4,140.533333,"Hitachinaka, Ibaraki Prefecture","Japan",1],[34.858,134.5454,"Hyogo, Hyogo Prefecture","Japan",1],[36.283333,140.416667,"Ibaraki, Ibaraki Prefecture","Japan",1],[35.298893,136.806915,"Ichinomiya, Aichi Prefecture","Japan",1],[34.766667,136.133333,"Iga, Mie Prefecture","Japan",1],[33.634514,130.689163,"Iizuka, Fukuoka Prefecture","Japan",1],[34.780706,135.404116,"Itami, Hyogo Prefecture","Japan",1],[37.033254,140.905004,"Iwaki/Fukushima, Fukushima Prefecture","Japan",1],[39.976968,141.226397,"Iwate, Iwate Prefecture","Japan",1],[32.0731125,130.3604431,"Izumi, Kagoshima Prefecture","Japan",1],[34.766667,138,"Kakegawa, Shizuoka Prefecture","Japan",1],[35,135,"Kansai","Japan",1],[34.6413,135.5629,"Kansai Prefecture","Japan",1],[37.366667,138.566667,"Kashiwazaki, Niigata Prefecture","Japan",1],[35.983333,139.75,"Kasukabe, Saitama Prefecture","Japan",1],[34.6799878,135.1699816,"Kobe, Hyogo Prefecture (early); Tokyo (later)","Japan",1],[34.6799878,135.1699816,"Kobe, Hyogo Prefecture / Osaka, Osaka Prefecture","Japan",1],[33.566667,133.533333,"Kochi, Kochi Prefecture / Takamatsu, Kagawa Prefecture","Japan",1],[35.004351,136.075382,"Konan, Shiga Prefecture","Japan",1],[33.3039602,130.5230331,"Kurume, Fukuoka Prefecture","Japan",1],[35.106317,135.727375,"Kyoto, Kyoto Prefecture (early, later); London, England (mid)","Japan",1],[35.106317,135.727375,"Kyoto, Kyoto Prefecture (early); Osaka, Osaka Prefecture (later)","Japan",1],[36.383333,139.066667,"Maebashi, Gunma Prefecture","Japan",1],[35.784135,139.906618,"Matsudo, Chiba Prefecture","Japan",1],[43.239764,141.887747,"Mikasa, Hokkaido","Japan",1],[24.790939,125.286888,"Miyakojima, Okinawa Prefecture","Japan",1],[35.378353,136.272736,"Nagahama, Shiga Prefecture","Japan",1],[36.745573,138.266316,"Nagano/Sendai, Miyagi Prefecture","Japan",1],[37.433333,138.833333,"Nagaoka, Niigata Prefecture","Japan",1],[32.783333,129.866667,"Nagasaki, Nagasaki Prefecture / Tokyo","Japan",1],[35.181456,136.906386,"Nagoya, Aichi Prefecture (early); Tokushima, Tokushima Prefecture (later)","Japan",1],[35.707397,139.663836,"Nakano, Tokyo","Japan",1],[35.783333,140.316667,"Narita, Chiba Prefecture","Japan",1],[37.916111,139.036389,"Niigata, Niigata Prefecture (early); Tokyo (later)","Japan",1],[37.916111,139.036389,"Niigata/Murakami, Niigata Prefecture","Japan",1],[34.8625,137.0625,"Nishio, Aichi Prefecture","Japan",1],[35.25,139.15,"Odawara, Kanagawa Prefecture","Japan",1],[34.9351055,137.1699448,"Okazaki City, Aichi Prefecture","Japan",1],[26.334167,127.805556,"Okinawa City, Okinawa","Japan",1],[26.334167,127.805556,"Okinawa, Okinawa Prefecture (early); Klamath Falls, Oregon, United States (later)","Japan",1],[33.535813,130.482488,"Onojo/Fukuoka, Fukuoka Prefecture","Japan",1],[34.693889,135.502222,"Osaka","Japan",1],[34.693889,135.502222,"Osaka, Osaka Prefecture (early); Osaka / Italy (later)","Japan",1],[34.693889,135.502222,"Osaka, Osaka Prefecture / Los Angeles, California, United States","Japan",1],[34.693889,135.502222,"Osaka, Osaka Prefecture / Tokyo","Japan",1],[43.183333,141,"Otaru, Hokkaido","Japan",1],[41.9583893,140.1387177,"Otobe, Hokkaido","Japan",1],[35.016667,135.85,"Otsu, Shiga Prefecture","Japan",1],[36.316667,139.8,"Oyama, Tochigi Prefecture","Japan",1],[33.5055981,132.5423508,"Ozu, Ehime Prefecture","Japan",1],[35.9052506,140.1894073,"Ryugasaki, Ibaraki Prefecture","Japan",1],[35.5777925,139.3818512,"Sagamihara, Kanagawa Prefecture","Japan",1],[34.573333,135.483056,"Sakai, Osaka Prefecture","Japan",1],[35.719158,140.23526,"Sakura, Chiba Prefecture","Japan",1],[43.0343477,141.3587952,"Sapporo, Hokkaido (early), Tokyo (later)","Japan",1],[43.0343477,141.3587952,"Sapporo, Hokkaido (early); Tochigi, Tochigi Prefecture (later)","Japan",1],[34.51,133.55,"Satocho, Aichi Prefecture","Japan",1],[35.2232593,137.0939636,"Seto, Aichi Prefecture (early); Nagoya, Aichi Prefecture (later)","Japan",1],[34.773076,135.565126,"Settsu, Osaka Prefecture","Japan",1],[44.1761264,142.3932495,"Shibetsu, Hokkaido","Japan",1],[35.840728,139.580015,"Shiki, Saitama Prefecture","Japan",1],[33.95,130.933333,"Shimonoseki, Yamaguchi Prefecture","Japan",1],[38.76659,140.306519,"Shinjo, Yamagata Prefecture","Japan",1],[38.320045,141.028576,"Shiogama, Miyagi Prefecture","Japan",1],[34.9858348,138.3853926,"Shizuoka, Shizuoka Prefecture (early); Tokyo (later)","Japan",1],[34.05,131.8,"Shunan, Yamaguchi Prefecture","Japan",1],[34.85,135.616667,"Takatsuki, Osaka Prefecture","Japan",1],[35.903611,136.168889,"Takefu, Fukui Prefecture","Japan",1],[36.3845764,139.7350845,"Tochigi, Tochigi Prefecture (early), Tokyo, Tokyo Prefecture (later)","Japan",1],[36.3845764,139.7350845,"Tochigi, Tochigi Prefecture / Fukushima, Fukushima Prefecture","Japan",1],[35.345122,137.188001,"Toki, Gifu Prefecture","Japan",1],[35.6762,139.6503,"Tokyo (early 1975-1987, later 1989-present), England (mid, 1987-1989)","Japan",1],[35.6762,139.6503,"Tokyo (early); Hokkaido (later)","Japan",1],[35.6762,139.6503,"Tokyo (early); Nagoya, Aichi Prefecture (mid); Yokohama, Kanagawa Prefecture (later)","Japan",1],[35.6762,139.6503,"Tokyo (early); Yokusuka, Kanagawa Prefecture (later)","Japan",1],[35.6762,139.6503,"Tokyo / Kanazawa, Ishikawa Prefecture","Japan",1],[35.6762,139.6503,"Tokyo / Nagano, Nagano Prefecture","Japan",1],[35.6762,139.6503,"Tokyo / Nagoya, Aichi Prefecture","Japan",1],[35.68972,139.69167,"Tokyo / Yokohama, Kanagawa Prefecture","Japan",1],[34.7653882,137.39711,"Toyohashi, Aichi Prefecture","Japan",1],[34.777334,135.47315,"Toyonaka, Osaka Prefecture","Japan",1],[36.034901,140.08015,"Tskuba, Ibaraki Prefecture","Japan",1],[35.069444,134.004444,"Tsuyama, Okayama Prefecture (early); Kobe, Hyogo Prefecture (later)","Japan",1],[36.4,138.25,"Ueda, Nagano Prefecture","Japan",1],[33.35,130.75,"Ukiha, Fukuoka Prefecture","Japan",1],[34.316667,133.833333,"Utazu, Kagawa Prefecture","Japan",1],[34.233333,135.166667,"Wakayama, Wakayama Prefecture","Japan",1],[45.401608,141.682739,"Wakkanai, Hokkaido","Japan",1],[35.826762,139.688331,"Warabi, Saitama Prefecture","Japan",1],[35.733299,140.100006,"Yachiyo, Chiba Prefecture","Japan",1],[35.819859,139.842267,"Yashio, Saitama Prefecture","Japan",1],[35.3200263,139.5800484,"Yokohama, Kanegawa Prefecture","Japan",1],[35.25,139.666667,"Yokosuka, Kanagawa Prefecture / Tokyo","Japan",1],[35.433333,133.333333,"Yonago, Tottori Prefecture","Japan",1],[37.5665,126.978,"Seoul","Korea, South",167],[35.1796,129.0756,"Busan","Korea, South",24],[37.4563,126.7052,"Incheon","Korea, South",5],[35.9001,128.6377,"Daegu, Gyeongsangbuk-do","Korea, South",4],[36.3504,127.3845,"Daejeon, Chungcheongnam-do","Korea, South",3],[37.259735,127.0089472,"Suwon, Gyeonggi-do","Korea, South",3],[37.5665,126.978,"Seoul (early); Yongin, Gyeonggi-do (later)","Korea, South",2],[35.5384,129.3114,"Ulsan, Gyeongsangnam-do","Korea, South",2],[35.1796,129.0756,"Busan (early); Seoul (later)","Korea, South",1],[35.1796,129.0756,"Busan / Yeongnam, Jeollanam-do","Korea, South",1],[36.633333,127.483333,"Cheongju, Chungcheongbuk-do (early); Seoul (later)","Korea, South",1],[36.633333,127.483333,"Cheongju, Chungcheongbuk-do / Daegu, Gyeongsangbuk-do","Korea, South",1],[37.4138,127.5183,"Gyeonggi-do","Korea, South",1],[37.531129,127.196685,"Hanam, Gyeonggi-do","Korea, South",1],[35.2,128.083333,"Jinju, Gyeongsangnam-do","Korea, South",1],[35.979305,126.718384,"Kunsan, Jeollabuk-do","Korea, South",1],[37.894736,127.200172,"Pocheon, Gyeonggi-do","Korea, South",1],[37.5665,126.978,"Seoul (early); Seoul, South Korea / Yokohama, Japan (later)","Korea, South",1],[37.5665,126.978,"Seoul / Yongin, Gyeonggi-do","Korea, South",1],[37.5665,126.978,"Seoul, South Korea (early, later); Berlin, Germany (mid)","Korea, South",1],[37.259735,127.0089472,"Suwon, Gyeonggi-do / Seoul","Korea, South",1],[25.033,121.5654,"Taipei","Taiwan",62],[22.9999,120.2269,"Tainan City","Taiwan",4],[24.1477,120.6736,"Taichung City","Taiwan",3],[24.956944,121.223611,"Chungli","Taiwan",1],[23.9821734,121.6068468,"Hualien City","Taiwan",1],[25.1276,121.7392,"Keelung City","Taiwan",1],[23.9115721,120.6872992,"Nantou City","Taiwan",1],[23.9115721,120.6872992,"Nantou City (early); Taichung City (later)","Taiwan",1],[22.9999,120.2269,"Tainan","Taiwan",1],[24.9936,121.301,"Taoyuan, Taiwan","Taiwan",1]],"fields":[{"name":"Latitude","type":"real","format":"","analyzerType":"FLOAT"},{"name":"Longitude","type":"real","format":"","analyzerType":"FLOAT"},{"name":"Location","type":"string","format":"","analyzerType":"STRING"},{"name":"Country","type":"string","format":"","analyzerType":"STRING"},{"name":"Number of Bands","type":"integer","format":"","analyzerType":"INT"}],"type":"","metadata":{"id":"-t3d898","format":"row","label":"GIS 661 Course Project sheet 3D v2.csv"},"disableDataOperation":false}}];
+            const config = {"version":"v1","config":{"visState":{"filters":[],"layers":[{"id":"dhfq62v","type":"grid","config":{"dataId":"-t3d898","label":"Heat Map","color":[179,173,158],"highlightColor":[252,242,26,255],"columns":{"lat":"Latitude","lng":"Longitude"},"isVisible":true,"visConfig":{"opacity":0.82,"worldUnitSize":30,"colorRange":{"colors":["#AFF05B","#C9D33A","#E8B02E","#FF8C38","#FF6B53","#FF5375","#EE4395","#C83DAC","#9B3DB3","#6E40AA"],"name":"Warm","type":"sequential","category":"D3","reversed":true,"colorLegends":{"#AFF05B":"1 to 5","#C9D33A":"6 to 10","#E8B02E":"11 to 20","#FF8C38":"21 to 50","#FF6B53":"51 to 75","#FF5375":"76 to 100","#EE4395":"101 to 150","#C83DAC":"151 to 300","#9B3DB3":"301 to 500","#6E40AA":"501 to 995"}},"coverage":1,"sizeRange":[0,250],"percentile":[0,100],"elevationPercentile":[0,100],"elevationScale":200,"enableElevationZoomFactor":true,"fixedHeight":false,"colorAggregation":"sum","sizeAggregation":"sum","enable3d":true},"hidden":false,"textLabel":[{"field":null,"color":[255,255,255],"size":18,"offset":[0,0],"anchor":"start","alignment":"center","outlineWidth":0,"outlineColor":[255,0,0,255],"background":false,"backgroundColor":[0,0,200,255]}]},"visualChannels":{"colorField":{"name":"Number of Bands","type":"integer"},"colorScale":"custom","sizeField":{"name":"Number of Bands","type":"integer"},"sizeScale":"linear"}}],"effects":[],"interactionConfig":{"tooltip":{"fieldsToShow":{"-t3d898":[{"name":"Latitude","format":null},{"name":"Longitude","format":null},{"name":"Location","format":null},{"name":"Country","format":null},{"name":"Number of Bands","format":null}]},"compareMode":false,"compareType":"absolute","enabled":true},"brush":{"size":0.5,"enabled":false},"geocoder":{"enabled":false},"coordinate":{"enabled":false}},"layerBlending":"normal","overlayBlending":"normal","splitMaps":[],"animationConfig":{"currentTime":null,"speed":1},"editor":{"features":[],"visible":true}},"mapState":{"bearing":24,"dragRotate":true,"latitude":39.430814956628815,"longitude":114.29522539985301,"pitch":50,"zoom":3.6382541735192926,"isSplit":false,"isViewportSynced":true,"isZoomLocked":false,"splitMapViewports":[]},"mapStyle":{"styleType":"dark-matter","topLayerGroups":{},"visibleLayerGroups":{"label":true,"road":true,"border":true,"building":true,"water":true,"land":true,"3d building":false},"threeDBuildingColor":[15.035172933000911,15.035172933000911,15.035172933000911],"backgroundColor":[0,0,0],"mapStyles":{}},"uiState":{"mapControls":{"mapLegend":{"active":true}}}}};
+
+            const loadedData = keplerGl.KeplerGlSchema.load(
+              datasets,
+              config
+            );
+
+            // For some reason Kepler overwrites the config without extra wait time
+            window.setTimeout(() => {
+              store.dispatch(
+                keplerGl.addDataToMap({
+                  datasets: loadedData.datasets,
+                  config: loadedData.config,
+                  options: {
+                    centerMap: false,
+                  },
+                })
+              );
+            }, 500);
+          }(KeplerGl, store))
+        </script>
+      </body>
+    </html>
+  
