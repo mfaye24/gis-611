@@ -29,6 +29,13 @@ header {
   -webkit-text-stroke: 1px black;
 }
 
+/* Style the split-header */
+.split-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Ensures they share the same baseline */
+}
+    
 /* Style the paragraphs */
 P {
   text-align: center;
@@ -53,7 +60,10 @@ P {
 <br>
 <br>
 <br>
-    <h2>South Korean Thrash Metal: Method</h2>
+    <h2>class="split-header">
+      <span>South Korean Thrash Metal: Method</span>          
+      <span>Interactive Heat Map of South Korean Metal Bands</span>
+    </h2>
 <style>
   .container {
     display: flex;
