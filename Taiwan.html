@@ -29,6 +29,13 @@ header {
   -webkit-text-stroke: 1px black;
 }
 
+/* Style the split-header */
+.split-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Ensures they share the same baseline */
+}
+    
 /* Style the paragraphs */
 P {
   text-align: center;
@@ -54,7 +61,10 @@ P {
 <br>
 <br>
 <br>
-    <h2>Taiwanese Diaspora Death Metal: Ripped to Shreds</h2>
+    <h2>class="split-header">
+      <span>Taiwanese Diaspora Death Metal: Ripped to Shreds</span>          
+      <span>Interactive Heat Map of Taiwanese Metal Bands</span>
+    </h2>
 <style>
   .container {
     display: flex;
