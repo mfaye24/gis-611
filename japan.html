@@ -29,6 +29,13 @@ header {
   -webkit-text-stroke: 1px black;
 }
 
+/* Style the split-header */
+.split-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Ensures they share the same baseline */
+}
+    
 /* Style the paragraphs */
 P {
   text-align: center;
@@ -58,7 +65,10 @@ P {
 <br>
 <br>
 <br>
-    <h2>J-pop Meets Metal: Babymetal</h2>
+    <h2 class="split-header">
+      <span>J-pop Meets Metal: Babymetal</span>          
+      <span>Interactive Heat Map of Japanese Metal Bands</span>
+    </h2>
 <style>
   .container {
     display: flex;
